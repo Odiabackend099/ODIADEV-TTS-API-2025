@@ -278,9 +278,9 @@ def text_to_speech():
                 "request_id": request_id
             }), 400
         
-        text = data.get('text', '').strip()
-        voice = data.get('voice', 'alloy')
-        provider = data.get('provider', 'openai')
+        text = str(data.get('text', '')).strip()
+        voice = str(data.get('voice', 'alloy'))
+        provider = str(data.get('provider', 'openai'))
         
         # Enhanced validation
         if not text:

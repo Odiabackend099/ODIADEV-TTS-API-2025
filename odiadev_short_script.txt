@@ -1,0 +1,17 @@
+Welcome to ODIADEV - Revolutionizing Voice AI in Nigeria!
+
+I'm excited to introduce you to ODIADEV, the groundbreaking company that's making voice AI accessible and affordable for everyone across Nigeria.
+
+ODIADEV stands at the forefront of the AI revolution, specifically designed for the Nigerian market. We understand the unique challenges that Nigerian businesses face - from network connectivity issues to cost constraints. That's why we've built our Text-to-Speech technology with Nigerian networks in mind.
+
+Our ODIADEV TTS API is a game-changer. It features advanced Nigerian network optimizations, including three-tier exponential backoff for MTN and Airtel connections, enhanced timeouts for slow networks, and intelligent request size limits. We've even implemented Nigerian phone number validation to ensure seamless integration with local systems.
+
+What makes ODIADEV truly revolutionary is our commitment to affordability. We offer three flexible pricing tiers: Starter at just 8,000 Naira, Pro at 15,000 Naira, and Enterprise at 75,000 Naira. Each plan includes comprehensive features like basic AI agents, text-to-speech capabilities, and dedicated support.
+
+Our technology works seamlessly on Nigerian networks, with automatic fallback mechanisms when external services are unavailable. We've built-in network diagnostics, comprehensive error handling, and request tracking to ensure reliability even in challenging network conditions.
+
+ODIADEV is more than just a technology company - we're a movement. We're democratizing AI access in Nigeria, making cutting-edge voice technology available to small businesses, startups, and individuals who previously couldn't afford such advanced solutions.
+
+Join us in this revolution. Visit odia.dev to learn more about how ODIADEV is transforming the Nigerian AI landscape, one voice at a time. Together, we're building a future where every Nigerian business can harness the power of artificial intelligence.
+
+This is ODIADEV - Built for Nigeria, Optimized for the World.
