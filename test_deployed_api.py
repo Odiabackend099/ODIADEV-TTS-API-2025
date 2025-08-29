@@ -31,14 +31,14 @@ def test_health_endpoint():
         if response.status_code == 200:
             result = response.json()
             print(f"Response: {json.dumps(result, indent=2)}")
-            print("✅ Health check passed!")
+            print("âœ… Health check passed!")
             return True
         else:
-            print(f"❌ Health check failed with status {response.status_code}")
+            print(f"âŒ Health check failed with status {response.status_code}")
             return False
         
     except Exception as e:
-        print(f"❌ Health check error: {e}")
+        print(f"âŒ Health check error: {e}")
         return False
 
 def test_tts_endpoint():
@@ -61,7 +61,7 @@ def test_tts_endpoint():
             
             if result.get('success') and result.get('data', {}).get('audio_base64'):
                 audio_data = result['data']['audio_base64']
-                print(f"✅ TTS generation successful!")
+                print(f"âœ… TTS generation successful!")
                 print(f"   Audio data length: {len(audio_data)} characters")
                 print(f"   Text processed: {result['data']['text']}")
                 print(f"   Voice used: {result['data']['voice']}")
@@ -71,14 +71,14 @@ def test_tts_endpoint():
                     decoded_audio = base64.b64decode(audio_data)
                     print(f"   Decoded audio size: {len(decoded_audio)} bytes")
                 except Exception as e:
-                    print(f"   ⚠️ Audio decode error: {e}")
+                    print(f"   âš ï¸ Audio decode error: {e}")
                 
                 return True
             else:
-                print("❌ TTS generation failed - No audio data returned")
+                print("âŒ TTS generation failed - No audio data returned")
                 return False
         else:
-            print(f"❌ TTS request failed with status {response.status_code}")
+            print(f"âŒ TTS request failed with status {response.status_code}")
             try:
                 error_result = response.json()
                 print(f"Error: {json.dumps(error_result, indent=2)}")
@@ -87,7 +87,7 @@ def test_tts_endpoint():
             return False
         
     except Exception as e:
-        print(f"❌ TTS test error: {e}")
+        print(f"âŒ TTS test error: {e}")
         return False
 
 def test_signup_endpoint():
@@ -114,7 +114,7 @@ def test_signup_endpoint():
             
             if result.get('status') == 'success' and result.get('client_id'):
                 client_id = result['client_id']
-                print(f"✅ Signup successful!")
+                print(f"âœ… Signup successful!")
                 print(f"   Client ID: {client_id}")
                 print(f"   Deployment Status: {result.get('deployment_status')}")
                 print(f"   TTS Generated: {result.get('tts_generated')}")
@@ -126,10 +126,10 @@ def test_signup_endpoint():
                 
                 return client_id
             else:
-                print("❌ Signup failed - No client ID returned")
+                print("âŒ Signup failed - No client ID returned")
                 return None
         else:
-            print(f"❌ Signup failed with status {response.status_code}")
+            print(f"âŒ Signup failed with status {response.status_code}")
             try:
                 error_result = response.json()
                 print(f"Error: {json.dumps(error_result, indent=2)}")
@@ -138,13 +138,13 @@ def test_signup_endpoint():
             return None
         
     except Exception as e:
-        print(f"❌ Signup test error: {e}")
+        print(f"âŒ Signup test error: {e}")
         return None
 
 def test_status_endpoint(client_id):
     """Test the status endpoint"""
     if not client_id:
-        print("❌ No client ID provided for status test")
+        print("âŒ No client ID provided for status test")
         return False
     
     print(f"Testing status endpoint for client {client_id}...")
@@ -160,7 +160,7 @@ def test_status_endpoint(client_id):
             client_info = result.get('client', {})
             deployments = result.get('deployments', [])
             
-            print(f"✅ Status check successful!")
+            print(f"âœ… Status check successful!")
             print(f"   Client Name: {client_info.get('full_name')}")
             print(f"   Business: {client_info.get('business_name')}")
             print(f"   Plan: {client_info.get('plan_tier')}")
@@ -169,11 +169,11 @@ def test_status_endpoint(client_id):
             
             return True
         else:
-            print(f"❌ Status check failed with status {response.status_code}")
+            print(f"âŒ Status check failed with status {response.status_code}")
             return False
         
     except Exception as e:
-        print(f"❌ Status test error: {e}")
+        print(f"âŒ Status test error: {e}")
         return False
 
 def test_logs_endpoint():
@@ -188,7 +188,7 @@ def test_logs_endpoint():
             result = response.json()
             logs = result.get('logs', [])
             
-            print(f"✅ Logs retrieval successful!")
+            print(f"âœ… Logs retrieval successful!")
             print(f"   Number of logs: {len(logs)}")
             
             if logs:
@@ -198,11 +198,11 @@ def test_logs_endpoint():
             
             return True
         else:
-            print(f"❌ Logs retrieval failed with status {response.status_code}")
+            print(f"âŒ Logs retrieval failed with status {response.status_code}")
             return False
         
     except Exception as e:
-        print(f"❌ Logs test error: {e}")
+        print(f"âŒ Logs test error: {e}")
         return False
 
 def generate_api_key():
@@ -236,17 +236,17 @@ def test_api_key_functionality():
         
         if response.status_code == 200:
             result = response.json()
-            print(f"✅ API key test successful!")
+            print(f"âœ… API key test successful!")
             print(f"   API Key: {api_key[:8]}...{api_key[-8:]}")
             print(f"   TTS Response: {result.get('success')}")
             return True
         else:
-            print(f"✅ API key test completed (expected behavior)")
+            print(f"âœ… API key test completed (expected behavior)")
             print(f"   Note: API key validation not implemented in current version")
             return True
         
     except Exception as e:
-        print(f"❌ API key test error: {e}")
+        print(f"âŒ API key test error: {e}")
         return False
 
 def run_comprehensive_tests():
@@ -287,7 +287,7 @@ def run_comprehensive_tests():
     total = len(test_results)
     
     for test_name, result in test_results:
-        status = "✅ PASSED" if result else "❌ FAILED"
+        status = "âœ… PASSED" if result else "âŒ FAILED"
         print(f"{test_name:20} : {status}")
         if result:
             passed += 1
@@ -295,18 +295,18 @@ def run_comprehensive_tests():
     print(f"\nOverall Results: {passed}/{total} tests passed")
     
     if passed == total:
-        print("🎉 ALL TESTS PASSED! The ODIADEV TTS API is fully functional!")
+        print("ðŸŽ‰ ALL TESTS PASSED! The ODIADEV TTS API is fully functional!")
     else:
-        print(f"⚠️  {total - passed} test(s) failed. Please review the results above.")
+        print(f"âš ï¸  {total - passed} test(s) failed. Please review the results above.")
     
     print_separator("API USAGE INFORMATION")
     print(f"API Base URL: {BASE_URL}")
     print("Available Endpoints:")
-    print(f"  • Health Check: GET {BASE_URL}/health")
-    print(f"  • TTS Generation: POST {BASE_URL}/api/tts")
-    print(f"  • Client Signup: POST {BASE_URL}/api/signup")
-    print(f"  • Status Check: GET {BASE_URL}/api/status/<client_id>")
-    print(f"  • System Logs: GET {BASE_URL}/api/logs")
+    print(f"  â€¢ Health Check: GET {BASE_URL}/health")
+    print(f"  â€¢ TTS Generation: POST {BASE_URL}/api/tts")
+    print(f"  â€¢ Client Signup: POST {BASE_URL}/api/signup")
+    print(f"  â€¢ Status Check: GET {BASE_URL}/api/status/<client_id>")
+    print(f"  â€¢ System Logs: GET {BASE_URL}/api/logs")
     
     return passed == total
 

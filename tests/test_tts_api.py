@@ -33,7 +33,7 @@ class TTSAPITester:
     
     def test_health_endpoint(self) -> bool:
         """Test the /health endpoint"""
-        print("🔍 Testing /health endpoint...")
+        print("ðŸ” Testing /health endpoint...")
         
         try:
             response = requests.get(f"{self.base_url}/health", timeout=10)
@@ -45,22 +45,22 @@ class TTSAPITester:
                 
                 # Validate expected fields
                 if "status" in data and "engine" in data:
-                    print("   ✅ Health check passed")
+                    print("   âœ… Health check passed")
                     return True
                 else:
-                    print("   ❌ Health check response missing required fields")
+                    print("   âŒ Health check response missing required fields")
                     return False
             else:
-                print(f"   ❌ Health check failed with status {response.status_code}")
+                print(f"   âŒ Health check failed with status {response.status_code}")
                 return False
                 
         except Exception as e:
-            print(f"   ❌ Error testing health endpoint: {e}")
+            print(f"   âŒ Error testing health endpoint: {e}")
             return False
     
     def test_voices_endpoint(self) -> bool:
         """Test the /v1/voices endpoint"""
-        print("🔍 Testing /v1/voices endpoint...")
+        print("ðŸ” Testing /v1/voices endpoint...")
         
         try:
             response = requests.get(f"{self.base_url}/v1/voices", timeout=10)
@@ -71,25 +71,25 @@ class TTSAPITester:
                 print(f"   Response: {json.dumps(data, indent=2)}")
                 
                 if "voices" in data and isinstance(data["voices"], list):
-                    print("   ✅ Voices endpoint passed")
+                    print("   âœ… Voices endpoint passed")
                     return True
                 else:
-                    print("   ❌ Voices endpoint response invalid")
+                    print("   âŒ Voices endpoint response invalid")
                     return False
             else:
-                print(f"   ❌ Voices endpoint failed with status {response.status_code}")
+                print(f"   âŒ Voices endpoint failed with status {response.status_code}")
                 return False
                 
         except Exception as e:
-            print(f"   ❌ Error testing voices endpoint: {e}")
+            print(f"   âŒ Error testing voices endpoint: {e}")
             return False
     
     def test_admin_key_issue(self) -> bool:
         """Test admin key issuance endpoint"""
-        print("🔍 Testing /admin/keys/issue endpoint...")
+        print("ðŸ” Testing /admin/keys/issue endpoint...")
         
         if not self.admin_token:
-            print("   ⚠️  No admin token available - skipping admin tests")
+            print("   âš ï¸  No admin token available - skipping admin tests")
             return False
         
         try:
@@ -118,13 +118,13 @@ class TTSAPITester:
                 
                 if "plaintext_key" in data:
                     self.test_api_key = data["plaintext_key"]
-                    print("   ✅ Admin key issuance passed")
+                    print("   âœ… Admin key issuance passed")
                     return True
                 else:
-                    print("   ❌ Admin key issuance response missing plaintext_key")
+                    print("   âŒ Admin key issuance response missing plaintext_key")
                     return False
             else:
-                print(f"   ❌ Admin key issuance failed with status {response.status_code}")
+                print(f"   âŒ Admin key issuance failed with status {response.status_code}")
                 try:
                     print(f"   Error: {response.json()}")
                 except:
@@ -132,15 +132,15 @@ class TTSAPITester:
                 return False
                 
         except Exception as e:
-            print(f"   ❌ Error testing admin key issuance: {e}")
+            print(f"   âŒ Error testing admin key issuance: {e}")
             return False
     
     def test_tts_endpoint(self) -> bool:
         """Test the /v1/tts endpoint"""
-        print("🔍 Testing /v1/tts endpoint...")
+        print("ðŸ” Testing /v1/tts endpoint...")
         
         if not self.test_api_key:
-            print("   ⚠️  No API key available - skipping TTS test")
+            print("   âš ï¸  No API key available - skipping TTS test")
             return False
         
         try:
@@ -174,10 +174,10 @@ class TTSAPITester:
                     print(f"   Response: {json.dumps(data, indent=2)}")
                     
                     if "url" in data or "format" in data:
-                        print("   ✅ TTS generation passed (JSON response)")
+                        print("   âœ… TTS generation passed (JSON response)")
                         return True
                     else:
-                        print("   ❌ TTS JSON response missing expected fields")
+                        print("   âŒ TTS JSON response missing expected fields")
                         return False
                         
                 elif "audio" in content_type:
@@ -189,16 +189,16 @@ class TTSAPITester:
                         # Save test audio file
                         with open("test_output.mp3", "wb") as f:
                             f.write(response.content)
-                        print("   ✅ TTS generation passed (audio response)")
+                        print("   âœ… TTS generation passed (audio response)")
                         return True
                     else:
-                        print("   ❌ TTS audio response is empty")
+                        print("   âŒ TTS audio response is empty")
                         return False
                 else:
-                    print(f"   ❌ Unexpected content type: {content_type}")
+                    print(f"   âŒ Unexpected content type: {content_type}")
                     return False
             else:
-                print(f"   ❌ TTS endpoint failed with status {response.status_code}")
+                print(f"   âŒ TTS endpoint failed with status {response.status_code}")
                 try:
                     print(f"   Error: {response.json()}")
                 except:
@@ -206,16 +206,16 @@ class TTSAPITester:
                 return False
                 
         except Exception as e:
-            print(f"   ❌ Error testing TTS endpoint: {e}")
+            print(f"   âŒ Error testing TTS endpoint: {e}")
             return False
     
     def run_all_tests(self) -> dict:
         """Run all tests and return results"""
-        print("🚀 ODIADEV TTS API Test Suite")
+        print("ðŸš€ ODIADEV TTS API Test Suite")
         print("=" * 50)
         
         # Wait for service to be ready
-        print("⏳ Waiting for service to be ready...")
+        print("â³ Waiting for service to be ready...")
         time.sleep(3)
         
         test_results = {}
@@ -238,24 +238,24 @@ class TTSAPITester:
         
         # Summary
         print("=" * 50)
-        print("📊 Test Results Summary:")
+        print("ðŸ“Š Test Results Summary:")
         print("=" * 50)
         
         passed = 0
         total = len(test_results)
         
         for test_name, result in test_results.items():
-            status = "✅ PASSED" if result else "❌ FAILED"
+            status = "âœ… PASSED" if result else "âŒ FAILED"
             print(f"   {test_name.title()}: {status}")
             if result:
                 passed += 1
         
-        print(f"\n🎯 Overall: {passed}/{total} tests passed")
+        print(f"\nðŸŽ¯ Overall: {passed}/{total} tests passed")
         
         if passed == total:
-            print("🎉 All tests passed! API is working correctly.")
+            print("ðŸŽ‰ All tests passed! API is working correctly.")
         else:
-            print("⚠️  Some tests failed. Check the output above for details.")
+            print("âš ï¸  Some tests failed. Check the output above for details.")
         
         return test_results
 

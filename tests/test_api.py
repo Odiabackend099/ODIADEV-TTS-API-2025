@@ -43,13 +43,13 @@ def test_tts_endpoint():
         if response.status_code == 200 and result.get('success'):
             # Check if audio data is present
             if result.get('data', {}).get('audio_base64'):
-                print("✅ TTS generation successful - Audio data received")
+                print("âœ… TTS generation successful - Audio data received")
                 return True
             else:
-                print("❌ TTS generation failed - No audio data")
+                print("âŒ TTS generation failed - No audio data")
                 return False
         else:
-            print(f"❌ TTS generation failed: {result.get('error', 'Unknown error')}")
+            print(f"âŒ TTS generation failed: {result.get('error', 'Unknown error')}")
             return False
         
     except Exception as e:
@@ -152,7 +152,7 @@ def main():
     print("=" * 50)
     passed = 0
     for test_name, result in test_results:
-        status = "✅ PASSED" if result else "❌ FAILED"
+        status = "âœ… PASSED" if result else "âŒ FAILED"
         print(f"{test_name}: {status}")
         if result:
             passed += 1

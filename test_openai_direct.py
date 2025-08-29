@@ -19,9 +19,9 @@ def test_openai_tts():
         print("\n1. Testing simple initialization...")
         try:
             client = openai.OpenAI()
-            print("✅ Simple initialization successful")
+            print("âœ… Simple initialization successful")
         except Exception as e:
-            print(f"❌ Simple initialization failed: {e}")
+            print(f"âŒ Simple initialization failed: {e}")
             return False
         
         print("\n2. Testing TTS request...")
@@ -36,22 +36,22 @@ def test_openai_tts():
             audio_data = response.content
             audio_base64 = base64.b64encode(audio_data).decode('utf-8')
             
-            print(f"✅ TTS request successful! Audio size: {len(audio_data)} bytes")
+            print(f"âœ… TTS request successful! Audio size: {len(audio_data)} bytes")
             print(f"Base64 length: {len(audio_base64)} characters")
             return True
             
         except Exception as e:
-            print(f"❌ TTS request failed: {e}")
+            print(f"âŒ TTS request failed: {e}")
             return False
             
     except Exception as e:
-        print(f"❌ Import or general error: {e}")
+        print(f"âŒ Import or general error: {e}")
         return False
 
 if __name__ == "__main__":
     success = test_openai_tts()
     if success:
-        print("\n🎉 OpenAI TTS test passed!")
+        print("\nðŸŽ‰ OpenAI TTS test passed!")
     else:
-        print("\n💥 OpenAI TTS test failed!")
+        print("\nðŸ’¥ OpenAI TTS test failed!")
 

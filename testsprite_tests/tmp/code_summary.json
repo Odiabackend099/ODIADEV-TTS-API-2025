@@ -1,0 +1,325 @@
+{
+  "tech_stack": [
+    "Python",
+    "Flask",
+    "SQLAlchemy",
+    "SQLite",
+    "OpenAI API",
+    "MiniMax API",
+    "Docker"
+  ],
+  "features": [
+    {
+      "name": "Health Check API",
+      "description": "System health monitoring endpoint",
+      "files": ["main.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Health Check API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/health": {
+            "get": {
+              "summary": "Health check endpoint",
+              "responses": {
+                "200": {
+                  "description": "System health status",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "status": {"type": "string"},
+                          "service": {"type": "string"},
+                          "version": {"type": "string"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Text-to-Speech API",
+      "description": "Convert text to speech using OpenAI or MiniMax TTS services",
+      "files": ["src/routes/odiadev.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "TTS API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/tts": {
+            "post": {
+              "summary": "Generate text-to-speech audio",
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "required": ["text"],
+                      "properties": {
+                        "text": {"type": "string", "maxLength": 4096},
+                        "voice": {"type": "string", "default": "alloy"},
+                        "provider": {"type": "string", "default": "openai"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "TTS generation successful",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "success": {"type": "boolean"},
+                          "message": {"type": "string"},
+                          "data": {"type": "object"}
+                        }
+                      }
+                    }
+                  }
+                },
+                "400": {"description": "Invalid request"},
+                "500": {"description": "Internal server error"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Client Signup API",
+      "description": "Register new clients for ODIADEV services with plan tiers",
+      "files": ["src/routes/odiadev.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Client Signup API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/signup": {
+            "post": {
+              "summary": "Register new client",
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "required": ["full_name", "phone", "business_name", "plan_tier"],
+                      "properties": {
+                        "full_name": {"type": "string"},
+                        "phone": {"type": "string", "pattern": "^\\d{11}$"},
+                        "business_name": {"type": "string"},
+                        "plan_tier": {"type": "string", "enum": ["starter", "pro", "enterprise"]},
+                        "voice_option": {"type": "boolean", "default": false}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Signup successful",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "status": {"type": "string"},
+                          "message": {"type": "string"},
+                          "client_id": {"type": "integer"},
+                          "deployment_status": {"type": "string"},
+                          "tts_generated": {"type": "boolean"},
+                          "welcome_audio": {"type": "object"}
+                        }
+                      }
+                    }
+                  }
+                },
+                "400": {"description": "Invalid request data"},
+                "500": {"description": "Internal server error"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Client Status API",
+      "description": "Retrieve client status and deployment information",
+      "files": ["src/routes/odiadev.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Client Status API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/status/{client_id}": {
+            "get": {
+              "summary": "Get client status",
+              "parameters": [
+                {
+                  "name": "client_id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {"type": "integer"}
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Client status retrieved",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "client": {"type": "object"},
+                          "deployments": {"type": "array"}
+                        }
+                      }
+                    }
+                  }
+                },
+                "404": {"description": "Client not found"},
+                "500": {"description": "Internal server error"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "System Logs API",
+      "description": "Retrieve system logs with filtering and pagination",
+      "files": ["src/routes/odiadev.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "System Logs API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/logs": {
+            "get": {
+              "summary": "Get system logs",
+              "parameters": [
+                {
+                  "name": "limit",
+                  "in": "query",
+                  "schema": {"type": "integer", "default": 100}
+                },
+                {
+                  "name": "source",
+                  "in": "query",
+                  "schema": {"type": "string"}
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Logs retrieved",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "logs": {"type": "array"}
+                        }
+                      }
+                    }
+                  }
+                },
+                "500": {"description": "Internal server error"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "User Management API",
+      "description": "Basic user CRUD operations",
+      "files": ["src/routes/user.py"],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "User Management API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/api/users": {
+            "get": {
+              "summary": "Get all users",
+              "responses": {
+                "200": {
+                  "description": "Users retrieved",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "users": {"type": "array"}
+                        }
+                      }
+                    }
+                  }
+                },
+                "500": {"description": "Internal server error"}
+              }
+            },
+            "post": {
+              "summary": "Create new user",
+              "requestBody": {
+                "required": true,
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "required": ["username", "email"],
+                      "properties": {
+                        "username": {"type": "string"},
+                        "email": {"type": "string", "format": "email"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "201": {
+                  "description": "User created",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "message": {"type": "string"},
+                          "user": {"type": "object"}
+                        }
+                      }
+                    }
+                  }
+                },
+                "400": {"description": "Invalid request data"},
+                "500": {"description": "Internal server error"}
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
