@@ -1,0 +1,290 @@
+{
+  "name": "ODIADEV TTS - API Key Revocation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "revoke-api-key",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1a1aaaa1-e7ee-6cf5-bcd1-e6f6g83c8c65",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "e2345678-90bc-def0-1234-56789abcdef0"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has_key_id",
+              "leftValue": "={{$json.key_id}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "2b2bbbb2-e7ee-6cf5-bcd2-e6f6g83c8c66",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.SUPABASE_URL}}/rest/v1/api_keys",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{$env.SUPABASE_SERVICE_ROLE_KEY}}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.SUPABASE_SERVICE_ROLE_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "eq.{{$json.key_id}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "status",
+              "value": "revoked"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3c3cccc3-e7ee-6cf5-bcd3-e6f6g83c8c67",
+      "name": "Revoke Key in DB",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        680,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "revocation_success",
+              "leftValue": "={{$json.length}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "4d4dddd4-e7ee-6cf5-bcd4-e6f6g83c8c68",
+      "name": "Check Revocation",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        900,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"success\": true, \"message\": \"API key revoked successfully\", \"key_id\": \"{{$json[0].id}}\", \"label\": \"{{$json[0].label}}\"}",
+        "options": {}
+      },
+      "id": "5e5eeee5-e7ee-6cf5-bcd5-e6f6g83c8c69",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"success\": false, \"error\": \"API key not found or already revoked\"}",
+        "responseCode": 404,
+        "options": {}
+      },
+      "id": "6f6ffff6-e7ee-6cf5-bcd6-e6f6g83c8c70",
+      "name": "Not Found Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"success\": false, \"error\": \"key_id is required\"}",
+        "responseCode": 400,
+        "options": {}
+      },
+      "id": "7g7gggg7-e7ee-6cf5-bcd7-e6f6g83c8c71",
+      "name": "Bad Request Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        680,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.SLACK_WEBHOOK_URL}}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "🔒 API Key Revoked\\n• Key ID: {{$json[0].id}}\\n• Label: {{$json[0].label}}\\n• Reason: {{$('Webhook').item.json.reason || 'Not specified'}}\\n• Revoked by: {{$('Webhook').item.json.revoked_by || 'System'}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8h8hhhh8-e7ee-6cf5-bcd8-e6f6g83c8c72",
+      "name": "Notify Revocation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        120
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Revoke Key in DB",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Bad Request Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revoke Key in DB": {
+      "main": [
+        [
+          {
+            "node": "Check Revocation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Revocation": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Revocation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Not Found Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-08-29T20:20:00.000Z",
+      "updatedAt": "2025-08-29T20:20:00.000Z",
+      "id": "tts-api-management",
+      "name": "TTS API Management"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-08-29T20:20:00.000Z",
+  "versionId": "1"
+}

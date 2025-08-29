@@ -1,0 +1,53 @@
+{
+  "voices": {
+    "naija_female": {
+      "model": "tts_models/en/ljspeech/tacotron2-DDC",
+      "vocoder": "vocoder_models/en/ljspeech/hifigan_v2",
+      "language": "en",
+      "accent": "nigerian",
+      "gender": "female",
+      "description": "Nigerian English female voice - warm and professional",
+      "sample_rate": 22050,
+      "speed": 1.0,
+      "pitch": 0.0,
+      "energy": 1.0
+    },
+    "naija_male": {
+      "model": "tts_models/en/ljspeech/glow-tts",
+      "vocoder": "vocoder_models/en/ljspeech/hifigan_v2", 
+      "language": "en",
+      "accent": "nigerian",
+      "gender": "male",
+      "description": "Nigerian English male voice - clear and authoritative",
+      "sample_rate": 22050,
+      "speed": 0.95,
+      "pitch": -0.1,
+      "energy": 1.1
+    }
+  },
+  "default_voice": "naija_female",
+  "supported_formats": ["wav", "mp3", "ogg"],
+  "cache_enabled": true,
+  "max_text_length": 5000,
+  "preprocessing": {
+    "text_normalization": true,
+    "pronunciation_fixes": {
+      "Nigeria": "nai-JEE-ree-ah",
+      "Lagos": "LAY-gos",
+      "Abuja": "ah-BOO-jah",
+      "naira": "NAI-rah"
+    }
+  },
+  "quality_settings": {
+    "production": {
+      "sample_rate": 22050,
+      "bit_depth": 16,
+      "channels": 1
+    },
+    "development": {
+      "sample_rate": 16000,
+      "bit_depth": 16,
+      "channels": 1
+    }
+  }
+}

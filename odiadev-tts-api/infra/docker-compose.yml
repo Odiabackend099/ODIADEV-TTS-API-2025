@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  tts:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    container_name: odiadev-tts
+    env_file:
+      - ../config/.env
+    ports:
+      - "8080:3000"
+    restart: unless-stopped

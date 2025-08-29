@@ -1,0 +1,12 @@
+fastapi==0.111.0
+uvicorn[standard]==0.30.0
+python-dotenv==1.0.1
+pydantic==2.7.0
+boto3==1.34.131
+pydub==0.25.1
+soundfile==0.12.1
+numpy==1.26.4
+hashlib==20081119 # stdlib shim, harmless if present
+requests==2.32.3
+# TTS engine (Coqui)
+TTS==0.15.6

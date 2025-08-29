@@ -1,0 +1,295 @@
+{
+  "name": "ODIADEV TTS - Usage Monitoring & Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "1a1aaaa1-d6dd-5be4-abc1-d5e5f72b7b54",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.SUPABASE_URL}}/rest/v1/tts_usage",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{$env.SUPABASE_SERVICE_ROLE_KEY}}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.SUPABASE_SERVICE_ROLE_KEY}}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "api_key_id,char_count,request_ms,cache_hit,created_at"
+            },
+            {
+              "name": "created_at",
+              "value": "gte.{{DateTime.now().minus({ minutes: 15 }).toISO()}}"
+            },
+            {
+              "name": "order",
+              "value": "created_at.desc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2b2bbbb2-d6dd-5be4-abc2-d5e5f72b7b55",
+      "name": "Fetch Recent Usage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Analyze usage data\nconst usage = $input.all();\n\nif (!usage || usage.length === 0) {\n  return [{ json: { hasData: false } }];\n}\n\n// Calculate metrics\nconst totalRequests = usage.length;\nconst totalChars = usage.reduce((sum, item) => sum + (item.json.char_count || 0), 0);\nconst avgResponseTime = usage.reduce((sum, item) => sum + (item.json.request_ms || 0), 0) / totalRequests;\nconst cacheHitRate = usage.filter(item => item.json.cache_hit).length / totalRequests * 100;\n\n// Group by API key\nconst keyUsage = {};\nusage.forEach(item => {\n  const keyId = item.json.api_key_id;\n  if (!keyUsage[keyId]) {\n    keyUsage[keyId] = { requests: 0, chars: 0 };\n  }\n  keyUsage[keyId].requests += 1;\n  keyUsage[keyId].chars += item.json.char_count || 0;\n});\n\n// Find high usage keys (>50 requests in 15 min)\nconst highUsageKeys = Object.entries(keyUsage)\n  .filter(([key, data]) => data.requests > 50)\n  .map(([key, data]) => ({ key_id: key, ...data }));\n\n// Check for performance issues (avg response time > 5s)\nconst slowResponses = usage.filter(item => (item.json.request_ms || 0) > 5000);\n\nreturn [{\n  json: {\n    hasData: true,\n    period: '15 minutes',\n    metrics: {\n      totalRequests,\n      totalChars,\n      avgResponseTime: Math.round(avgResponseTime),\n      cacheHitRate: Math.round(cacheHitRate * 100) / 100\n    },\n    alerts: {\n      highUsageKeys,\n      slowResponseCount: slowResponses.length,\n      needsAttention: highUsageKeys.length > 0 || slowResponses.length > 5 || avgResponseTime > 3000\n    }\n  }\n}];"
+      },
+      "id": "3c3cccc3-d6dd-5be4-abc3-d5e5f72b7b56",
+      "name": "Analyze Usage",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "needs_attention",
+              "leftValue": "={{$json.alerts.needsAttention}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "4d4dddd4-d6dd-5be4-abc4-d5e5f72b7b57",
+      "name": "Check Alerts",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.SLACK_WEBHOOK_URL}}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "🚨 *ODIADEV TTS Usage Alert* ({{$json.period}})\\n\\n📊 *Metrics:*\\n• Requests: {{$json.metrics.totalRequests}}\\n• Characters: {{$json.metrics.totalChars}}\\n• Avg Response: {{$json.metrics.avgResponseTime}}ms\\n• Cache Hit Rate: {{$json.metrics.cacheHitRate}}%\\n\\n⚠️ *Alerts:*\\n• High usage keys: {{$json.alerts.highUsageKeys.length}}\\n• Slow responses: {{$json.alerts.slowResponseCount}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5e5eeee5-d6dd-5be4-abc5-d5e5f72b7b58",
+      "name": "Send Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.TTS_API_URL}}/health",
+        "options": {}
+      },
+      "id": "6f6ffff6-d6dd-5be4-abc6-d5e5f72b7b59",
+      "name": "Health Check",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        460,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "api_down",
+              "leftValue": "={{$json.status}}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "notEqual"
+              }
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "7g7gggg7-d6dd-5be4-abc7-d5e5f72b7b60",
+      "name": "Check Health",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        680,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.SLACK_WEBHOOK_URL}}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "🔴 *CRITICAL: ODIADEV TTS API DOWN*\\n\\nThe TTS API health check failed. Please investigate immediately.\\n\\nExpected: `{\"status\": \"ok\"}`\\nReceived: `{{JSON.stringify($json)}}`"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8h8hhhh8-d6dd-5be4-abc8-d5e5f72b7b61",
+      "name": "Critical Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        900,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Recent Usage",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Health Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Recent Usage": {
+      "main": [
+        [
+          {
+            "node": "Analyze Usage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Usage": {
+      "main": [
+        [
+          {
+            "node": "Check Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Alerts": {
+      "main": [
+        [
+          {
+            "node": "Send Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Health Check": {
+      "main": [
+        [
+          {
+            "node": "Check Health",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Health": {
+      "main": [
+        [
+          {
+            "node": "Critical Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-08-29T20:20:00.000Z",
+      "updatedAt": "2025-08-29T20:20:00.000Z",
+      "id": "tts-monitoring",
+      "name": "TTS Monitoring"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-08-29T20:20:00.000Z",
+  "versionId": "1"
+}
