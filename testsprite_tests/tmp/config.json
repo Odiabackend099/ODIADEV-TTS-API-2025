@@ -1,7 +1,14 @@
 {
-  "status": "commited",
+  "status": "committed",
   "type": "backend",
   "scope": "codebase",
   "localEndpoint": "http://localhost:5001",
-  "backendAuthType": "public"
+  "backendAuthType": "public",
+  "projectName": "ODIADEV TTS API",
+  "testFramework": "pytest",
+  "apiEndpoints": [
+    "/health",
+    "/debug",
+    "/test-tts"
+  ]
 }

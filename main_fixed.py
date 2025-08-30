@@ -3,17 +3,33 @@ import sys
 from dotenv import load_dotenv
 
 # Load environment variables from config folder
-load_dotenv(os.path.join(os.path.dirname(__file__), 'config', '.env'))
+config_path = os.path.join(os.path.dirname(__file__), 'config', '.env')
+print(f"Loading .env from: {config_path}")
+load_dotenv(config_path)
 
-# DON'T CHANGE THIS !!!
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+print(f"Working directory: {os.getcwd()}")
+print(f"Python path: {sys.path[:3]}")
 
-from flask import Flask, send_from_directory, jsonify
-from flask_cors import CORS
-from src.models.user import db
-from src.models.client import Client, Deployment, Log
-from src.routes.user import user_bp
-from src.routes.odiadev import odiadev_bp
+# Add src to path for imports
+src_path = os.path.join(os.path.dirname(__file__), 'src')
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
+try:
+    from flask import Flask, send_from_directory, jsonify
+    from flask_cors import CORS
+    print("Flask imports successful")
+    
+    # Try importing our models and routes
+    from models.user import db
+    from models.client import Client, Deployment, Log
+    from routes.user import user_bp
+    from routes.odiadev import odiadev_bp
+    print("Custom imports successful")
+    
+except ImportError as e:
+    print(f"Import error: {e}")
+    sys.exit(1)
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'asdf#FGSgvasgf$5$WGT')
@@ -25,13 +41,18 @@ app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(odiadev_bp, url_prefix='/api')
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
+db_path = os.path.join(os.path.dirname(__file__), 'database', 'app.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+print(f"Database path: {db_path}")
+print(f"Database exists: {os.path.exists(db_path)}")
+
 db.init_app(app)
 
 # Create database tables
 with app.app_context():
     db.create_all()
+    print("Database tables created/verified")
 
 @app.route('/health')
 def health_check():
@@ -39,7 +60,8 @@ def health_check():
     return jsonify({
         "status": "healthy",
         "service": "ODIADEV TTS API",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "database": "connected" if os.path.exists(db_path) else "not found"
     })
 
 @app.route('/', defaults={'path': ''})
@@ -58,8 +80,10 @@ def serve(path):
         else:
             return jsonify({
                 "message": "Welcome to ODIADEV TTS API",
+                "status": "running",
                 "endpoints": {
                     "health": "/health",
+                    "tts": "/api/tts",
                     "signup": "/api/signup",
                     "status": "/api/status/<client_id>",
                     "logs": "/api/logs"
@@ -67,5 +91,7 @@ def serve(path):
             })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
-
+    print("Starting ODIADEV TTS API...")
+    print(f"Environment: {os.getenv('FLASK_ENV', 'development')}")
+    print(f"OpenAI Key configured: {'Yes' if os.getenv('OPENAI_API_KEY') else 'No'}")
+    app.run(host='127.0.0.1', port=5002, debug=True)
